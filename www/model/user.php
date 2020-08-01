@@ -45,6 +45,7 @@ function login_as($db, $name, $password){
   return $user;
 }
 
+//ユーザのログイン情報を取得
 function get_login_user($db){
   $login_user_id = get_session('user_id');
 

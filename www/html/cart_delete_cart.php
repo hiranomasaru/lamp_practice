@@ -16,6 +16,7 @@ $user = get_login_user($db);
 
 $cart_id = get_post('cart_id');
 
+//カート内の商品データを削除
 if(delete_cart($db, $cart_id)){
   set_message('カートを削除しました。');
 } else {

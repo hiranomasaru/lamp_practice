@@ -14,8 +14,10 @@ if(is_logined() === false){
 $db = get_db_connect();
 $user = get_login_user($db);
 
+//カートの商品データをfetch_allで取得
 $carts = get_user_carts($db, $user['user_id']);
 
+//カート内の合計金額をforeachで取得
 $total_price = sum_carts($carts);
 
 include_once VIEW_PATH . 'cart_view.php';

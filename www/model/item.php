@@ -4,6 +4,7 @@ require_once MODEL_PATH . 'db.php';
 
 // DB利用
 
+//item_idが一致する商品データの取得
 function get_item($db, $item_id){
   $sql = "
     SELECT
@@ -51,6 +52,7 @@ function get_open_items($db){
   return get_items($db, true);
 }
 
+
 function regist_item($db, $name, $price, $stock, $status, $image){
   $filename = get_upload_filename($image);
   if(validate_item($name, $price, $stock, $filename, $status) === false){
@@ -58,6 +60,7 @@ function regist_item($db, $name, $price, $stock, $status, $image){
   }
   return regist_item_transaction($db, $name, $price, $stock, $status, $image, $filename);
 }
+
 
 function regist_item_transaction($db, $name, $price, $stock, $status, $image, $filename){
   $db->beginTransaction();
@@ -107,13 +110,13 @@ function update_item_stock($db, $item_id, $stock){
     UPDATE
       items
     SET
-      stock = {$stock}
+      stock = ?
     WHERE
-      item_id = {$item_id}
+      item_id = ?
     LIMIT 1
   ";
   
-  return execute_query($db, $sql);
+  return execute_query($db, $sql, array($stock, $item_id));
 }
 
 function destroy_item($db, $item_id){
