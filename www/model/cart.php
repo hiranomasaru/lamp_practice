@@ -24,7 +24,7 @@ function get_user_carts($db, $user_id){
     WHERE
       carts.user_id = ?
   ";
-  return fetch_all_query($db, $sql, array($user_id);
+  return fetch_all_query($db, $sql, array($user_id));
 }
 
 //user_id,item_idが一致する商品の取得(fetch)
@@ -91,7 +91,7 @@ function update_cart_amount($db, $cart_id, $amount){
       cart_id = ?
     LIMIT 1
   ";
-  return execute_query($db, $sql, array($amoun, ));
+  return execute_query($db, $sql, array($amount, $cart_id));
 }
 
 //商品情報の削除
@@ -100,11 +100,11 @@ function delete_cart($db, $cart_id){
     DELETE FROM
       carts
     WHERE
-      cart_id = {$cart_id}
+      cart_id = ?
     LIMIT 1
   ";
 
-  return execute_query($db, $sql);
+  return execute_query($db, $sql, array($cart_id));
 }
 
 
@@ -130,10 +130,10 @@ function delete_user_carts($db, $user_id){
     DELETE FROM
       carts
     WHERE
-      user_id = {$user_id}
+      user_id = ?
   ";
 
-  execute_query($db, $sql);
+  execute_query($db, $sql, array($user_id));
 }
 
 
