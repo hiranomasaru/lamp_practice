@@ -1,11 +1,11 @@
 <?php
-//.phpを読み込み、エラーの場合処理停止
+
 require_once '../conf/const.php';
 require_once MODEL_PATH . 'functions.php';
 require_once MODEL_PATH . 'user.php';
 require_once MODEL_PATH . 'item.php';
 
-//セッションスタート
+
 session_start();
 
 //セッション名が取得できない場合、ログイン画面に移動
