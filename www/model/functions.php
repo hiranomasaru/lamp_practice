@@ -1,15 +1,17 @@
 <?php
-
+//変数内の情報を取得
 function dd($var){
   var_dump($var);
   exit();
 }
 
+//URLのブラウザ表示
 function redirect_to($url){
   header('Location: ' . $url);
   exit;
 }
 
+//$GETの$nameをチェックし、値を返す
 function get_get($name){
   if(isset($_GET[$name]) === true){
     return $_GET[$name];
@@ -17,6 +19,7 @@ function get_get($name){
   return '';
 }
 
+//$POST送の$nameをチェックし、値を返す
 function get_post($name){
   if(isset($_POST[$name]) === true){
     return $_POST[$name];
@@ -24,6 +27,7 @@ function get_post($name){
   return '';
 }
 
+//$FILESの$nameをチェックし、入っている場合返り値、入ってない場合空の配列設定
 function get_file($name){
   if(isset($_FILES[$name]) === true){
     return $_FILES[$name];
@@ -31,6 +35,7 @@ function get_file($name){
   return array();
 }
 
+//$SESSIONの$nameをチェックし、値を返す
 function get_session($name){
   if(isset($_SESSION[$name]) === true){
     return $_SESSION[$name];
@@ -38,14 +43,17 @@ function get_session($name){
   return '';
 }
 
+//$SESSION[$name]に$valueを代入
 function set_session($name, $value){
   $_SESSION[$name] = $value;
 }
 
+//$SESSION[errors][]配列に$errorを代入
 function set_error($error){
   $_SESSION['__errors'][] = $error;
 }
 
+//セッション エラーを取得し、からの配列を代入し中身を削除
 function get_errors(){
   $errors = get_session('__errors');
   if($errors === ''){
@@ -55,14 +63,17 @@ function get_errors(){
   return $errors;
 }
 
+//エラーの有無確認
 function has_error(){
   return isset($_SESSION['__errors']) && count($_SESSION['__errors']) !== 0;
 }
 
+//$SESSION[message][]配列に$errorを代入
 function set_message($message){
   $_SESSION['__messages'][] = $message;
 }
 
+//セッション メッセージを取得し、からの配列を代入し中身を削除
 function get_messages(){
   $messages = get_session('__messages');
   if($messages === ''){
@@ -72,9 +83,11 @@ function get_messages(){
   return $messages;
 }
 
+//初回ログインか確認
 function is_logined(){
   return get_session('user_id') !== '';
 }
+
 
 function get_upload_filename($file){
   if(is_valid_upload_image($file) === false){
@@ -135,3 +148,6 @@ function is_valid_upload_image($image){
   return true;
 }
 
+function h($str){
+  return htmlspecialchars($str,ENT_QUOTES,'UTF-8');
+}

@@ -13,6 +13,7 @@ if(is_logined() === false){
 $db = get_db_connect();
 $user = get_login_user($db);
 
+//ステータスが公開の商品データの取得　結合代入を使用
 $items = get_open_items($db);
 
 include_once VIEW_PATH . 'index_view.php';
