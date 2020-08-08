@@ -17,10 +17,17 @@
     <div class="card-deck">
       <div class="row">
       <?php foreach($items as $item){ ?>
+        <?php 
+            foreach($item as $key => $value){
+              if(is_numeric($value) === false){
+                $item[$key] = h($value);
+              }
+            }
+        ?> 
         <div class="col-6 item">
           <div class="card h-100 text-center">
             <div class="card-header">
-              <?php print(h($item['name'])); ?>
+              <?php print($item['name']); ?>
             </div>
             <figure class="card-body">
               <img class="card-img" src="<?php print(IMAGE_PATH . $item['image']); ?>">
@@ -30,6 +37,7 @@
                   <form action="index_add_cart.php" method="post">
                     <input type="submit" value="カートに追加" class="btn btn-primary btn-block">
                     <input type="hidden" name="item_id" value="<?php print($item['item_id']); ?>">
+                    <input type="hidden" name="csrftoken" value="<?php print(get_session('csrftoken'));?>">
                   </form>
                 <?php } else { ?>
                   <p class="text-danger">現在売り切れです。</p>

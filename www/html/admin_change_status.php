@@ -18,6 +18,13 @@ if(is_admin($user) === false){
   redirect_to(LOGIN_URL);
 }
 
+if(check_token() === false){
+  redirect_to(LOGIN_URL);
+  exit;
+}
+
+set_token();
+
 $item_id = get_post('item_id');
 $changes_to = get_post('changes_to');
 

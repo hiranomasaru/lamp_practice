@@ -18,5 +18,9 @@ if(is_admin($user) === false){
   redirect_to(LOGIN_URL);
 }
 
+set_token();
+
+iframe_prohibit();
+
 $items = get_all_items($db);
 include_once VIEW_PATH . '/admin_view.php';

@@ -21,9 +21,9 @@ function get_user_carts($db, $user_id){
     ON
       carts.item_id = items.item_id
     WHERE
-      carts.user_id = {$user_id}
+      carts.user_id = ?
   ";
-  return fetch_all_query($db, $sql);
+  return fetch_all_query($db, $sql,array($user_id));
 }
 
 function get_user_cart($db, $user_id, $item_id){
@@ -45,12 +45,12 @@ function get_user_cart($db, $user_id, $item_id){
     ON
       carts.item_id = items.item_id
     WHERE
-      carts.user_id = {$user_id}
+      carts.user_id = ?
     AND
-      items.item_id = {$item_id}
+      items.item_id = ?
   ";
 
-  return fetch_query($db, $sql);
+  return fetch_query($db, $sql, array($user_id, $item_id));
 
 }
 
@@ -70,10 +70,10 @@ function insert_cart($db, $user_id, $item_id, $amount = 1){
         user_id,
         amount
       )
-    VALUES({$item_id}, {$user_id}, {$amount})
+    VALUES(?, ?, ?)
   ";
 
-  return execute_query($db, $sql);
+  return execute_query($db, $sql, array($item_id, $user_id, $amount));
 }
 
 function update_cart_amount($db, $cart_id, $amount){
@@ -81,12 +81,12 @@ function update_cart_amount($db, $cart_id, $amount){
     UPDATE
       carts
     SET
-      amount = {$amount}
+      amount = ?
     WHERE
-      cart_id = {$cart_id}
+      cart_id = ?
     LIMIT 1
   ";
-  return execute_query($db, $sql);
+  return execute_query($db, $sql, array($amount, $cart_id));
 }
 
 function delete_cart($db, $cart_id){
@@ -94,39 +94,55 @@ function delete_cart($db, $cart_id){
     DELETE FROM
       carts
     WHERE
-      cart_id = {$cart_id}
+      cart_id = ?
     LIMIT 1
   ";
 
-  return execute_query($db, $sql);
+  return execute_query($db, $sql, array($cart_id));
 }
 
 function purchase_carts($db, $carts){
   if(validate_cart_purchase($carts) === false){
     return false;
   }
+  $db->beginTransaction();
   foreach($carts as $cart){
     if(update_item_stock(
         $db, 
         $cart['item_id'], 
         $cart['stock'] - $cart['amount']
-      ) === false){
+      ) 
+      && insert_orders(
+        $db,
+        $cart['user_id']
+      )
+      && insert_orders_detail(
+        $db,
+        $cart['item_id'],
+        $cart['amount'])
+      ){
+        $db->commit();
+      }else{
       set_error($cart['name'] . 'の購入に失敗しました。');
+      $db->rollback();
     }
   }
   
   delete_user_carts($db, $carts[0]['user_id']);
 }
 
+
+
+
 function delete_user_carts($db, $user_id){
   $sql = "
     DELETE FROM
       carts
     WHERE
-      user_id = {$user_id}
+      user_id = ?
   ";
 
-  execute_query($db, $sql);
+  execute_query($db, $sql, array($user_id));
 }
 
 
@@ -157,3 +173,92 @@ function validate_cart_purchase($carts){
   return true;
 }
 
+function insert_orders($db, $user_id){
+  $sql = "
+    INSERT INTO
+      orders(
+        user_id
+      )
+    VALUES(?)
+  ";
+
+  return execute_query($db, $sql, array($user_id));
+}
+
+function insert_orders_detail($db, $order_id, $item_id, $amount = 1){
+  $sql = "
+    INSERT INTO
+      orders_detail(
+        order_id,
+        item_id,
+        amount
+      )
+    VALUES(?, ?)
+  ";
+
+  return execute_query($db, $sql, array($order_id, $item_id, $amount));
+}
+
+function get_user_orders($db, $user_id){
+  $sql = "
+    SELECT
+      order_id.orders_detail,
+      item_id.orders_detail,
+      amount.orders_detail,
+      user_id.orders,
+      created.orders,
+      name.items,
+      price.items,
+      name.users
+    FROM
+      orders_detail
+    JOIN
+      orders
+    ON
+      orders_detail.order_id = orders.order_id
+    JOIN
+      items
+    ON
+      orders_detail.item_id = items.item_id
+    JOIN
+      users
+    ON
+      orders.user_id = users.user_id
+    WHERE
+      orders.user_id = ?
+  ";
+  return fetch_all_query($db, $sql,array($user_id));
+}
+
+function get_user_order($db, $user_id, $item_id){
+  $sql = "
+    SELECT
+      order_id.orders_detail,
+      item_id.orders_detail,
+      amount.orders_detail,
+      user_id.orders,
+      created.orders,
+      name.items,
+      price.items,
+      name.users
+    FROM
+      orders_detail
+    JOIN
+      orders
+    ON
+      orders_detail.order_id = orders.order_id
+    JOIN
+      items
+    ON
+      orders_detail.item_id = items.item_id
+    JOIN
+      users
+    ON
+      orders.user_id = users.user_id
+    WHERE
+      orders.user_id = ?
+    AND
+      items.item_id =
+  ";
+  return fetch_all_query($db, $sql,array($user_id, $item_id));
+}

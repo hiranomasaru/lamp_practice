@@ -9,6 +9,15 @@ if(is_logined() === true){
   redirect_to(HOME_URL);
 }
 
+if(check_token() === false){
+  redirect_to(LOGIN_URL);
+  exit;
+}
+
+set_token();
+
+iframe_prohibit();
+
 $name = get_post('name');
 $password = get_post('password');
 $password_confirmation = get_post('password_confirmation');
