@@ -1,6 +1,7 @@
 <?php 
 require_once MODEL_PATH . 'functions.php';
 require_once MODEL_PATH . 'db.php';
+require_once MODEL_PATH . 'order.php';
 
 function get_user_carts($db, $user_id){
   $sql = "
@@ -106,32 +107,23 @@ function purchase_carts($db, $carts){
     return false;
   }
   $db->beginTransaction();
-  foreach($carts as $cart){
-    if(update_item_stock(
-        $db, 
-        $cart['item_id'], 
-        $cart['stock'] - $cart['amount']
-      ) 
-      && insert_orders(
-        $db,
-        $cart['user_id']
-      )
-      && insert_orders_detail(
-        $db,
-        $cart['item_id'],
-        $cart['amount'])
-      ){
-        $db->commit();
-      }else{
-      set_error($cart['name'] . 'の購入に失敗しました。');
-      $db->rollback();
+  if(insert_orders($db, $carts[0]['user_id']) !== false){
+    $order_id = $db->lastInsertId('order_id');
+    foreach($carts as $cart){
+      if(update_item_stock($db, $cart['item_id'], $cart['stock'] - $cart['amount'])
+        && insert_orders_detail($db, $order_id, $cart['item_id'], $cart['amount'], $cart['price']) === false)
+      {
+        set_error($cart['name'] . 'の購入に失敗しました。');
+        $db->rollback();
+        return false;
+      }
     }
+    $db->commit();
+    delete_user_carts($db, $carts[0]['user_id']);
+  }else{
+    return false;
   }
-  
-  delete_user_carts($db, $carts[0]['user_id']);
 }
-
-
 
 
 function delete_user_carts($db, $user_id){
@@ -171,94 +163,4 @@ function validate_cart_purchase($carts){
     return false;
   }
   return true;
-}
-
-function insert_orders($db, $user_id){
-  $sql = "
-    INSERT INTO
-      orders(
-        user_id
-      )
-    VALUES(?)
-  ";
-
-  return execute_query($db, $sql, array($user_id));
-}
-
-function insert_orders_detail($db, $order_id, $item_id, $amount = 1){
-  $sql = "
-    INSERT INTO
-      orders_detail(
-        order_id,
-        item_id,
-        amount
-      )
-    VALUES(?, ?)
-  ";
-
-  return execute_query($db, $sql, array($order_id, $item_id, $amount));
-}
-
-function get_user_orders($db, $user_id){
-  $sql = "
-    SELECT
-      order_id.orders_detail,
-      item_id.orders_detail,
-      amount.orders_detail,
-      user_id.orders,
-      created.orders,
-      name.items,
-      price.items,
-      name.users
-    FROM
-      orders_detail
-    JOIN
-      orders
-    ON
-      orders_detail.order_id = orders.order_id
-    JOIN
-      items
-    ON
-      orders_detail.item_id = items.item_id
-    JOIN
-      users
-    ON
-      orders.user_id = users.user_id
-    WHERE
-      orders.user_id = ?
-  ";
-  return fetch_all_query($db, $sql,array($user_id));
-}
-
-function get_user_order($db, $user_id, $item_id){
-  $sql = "
-    SELECT
-      order_id.orders_detail,
-      item_id.orders_detail,
-      amount.orders_detail,
-      user_id.orders,
-      created.orders,
-      name.items,
-      price.items,
-      name.users
-    FROM
-      orders_detail
-    JOIN
-      orders
-    ON
-      orders_detail.order_id = orders.order_id
-    JOIN
-      items
-    ON
-      orders_detail.item_id = items.item_id
-    JOIN
-      users
-    ON
-      orders.user_id = users.user_id
-    WHERE
-      orders.user_id = ?
-    AND
-      items.item_id =
-  ";
-  return fetch_all_query($db, $sql,array($user_id, $item_id));
 }
