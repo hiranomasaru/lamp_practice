@@ -8,4 +8,8 @@ if(is_logined() === true){
   redirect_to(HOME_URL);
 }
 
+set_token();
+
+iframe_prohibit();
+
 include_once VIEW_PATH . 'login_view.php';

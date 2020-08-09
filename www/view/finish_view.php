@@ -25,9 +25,16 @@
         </thead>
         <tbody>
           <?php foreach($carts as $cart){ ?>
+          <?php 
+            foreach($cart as $key => $value){
+              if(is_numeric($value) === false){
+                $cart[$key] = h($value);
+              }
+            }
+          ?>
           <tr>
             <td><img src="<?php print(IMAGE_PATH . $cart['image']);?>" class="item_image"></td>
-            <td><?php print(h($cart['name'])); ?></td>
+            <td><?php print($cart['name']); ?></td>
             <td><?php print(number_format($cart['price'])); ?>円</td>
             <td>
                 <?php print($cart['amount']); ?>個

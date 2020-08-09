@@ -138,3 +138,17 @@ function is_valid_upload_image($image){
 function h($str){
   return htmlspecialchars($str,ENT_QUOTES,'UTF-8');
 }
+
+function set_token(){
+  $tokenbyte = openssl_random_pseudo_bytes(16);
+  $csrftoken = bin2hex($tokenbyte);
+  set_session('csrftoken', $csrftoken);
+}
+
+function check_token(){
+  return get_post('csrftoken') === get_session('csrftoken');
+}
+
+function iframe_prohibit(){
+  header("X-FRAME-OPTIONS: DENY");
+}

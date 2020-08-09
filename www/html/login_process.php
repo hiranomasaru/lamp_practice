@@ -26,3 +26,10 @@ if ($user['type'] === USER_TYPE_ADMIN){
   redirect_to(ADMIN_URL);
 }
 redirect_to(HOME_URL);
+
+if(check_token() === false){
+  redirect_to(LOGIN_URL);
+  exit;
+}
+
+set_token();
