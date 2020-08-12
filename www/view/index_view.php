@@ -49,6 +49,21 @@
       <?php } ?>
       </div>
     </div>
+    <div class="rank3">
+      <?php $i = 1;?>
+      <?php foreach($rank3_items as $rank3_item){ ?>
+        <?php 
+          foreach($rank3_item as $key => $value){
+            if(is_numeric($value) === false){
+              $rank3_item[$key] = h($value);
+            }
+          }
+        ?> 
+      <p>人気ランキング<?php print($i++) ?>位</p>
+      <p><?php print($rank3_item['name']);?></p>
+      <img src="<?php print(IMAGE_PATH . $rank3_item['image']); ?>">
+      <?php } ;?>
+    </div>
   </div>
   
 </body>

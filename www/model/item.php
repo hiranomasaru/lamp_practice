@@ -206,3 +206,39 @@ function is_valid_item_status($status){
   }
   return $is_valid;
 }
+
+function get_rank3_items($db, $is_open = false){
+  $sql = '
+    SELECT
+      items.item_id, 
+      items.name,
+      items.image,
+      items.status,
+      SUM(orders_detail.amount) AS buy_amount
+    FROM
+      items
+    JOIN
+      orders_detail
+    ON
+      items.item_id = orders_detail.item_id
+    ';
+    if($is_open === true){
+    $sql .= '
+      WHERE items.status = 1
+    ';
+    $sql .= '
+    GROUP BY
+      items.item_id
+    ORDER BY
+      buy_amount DESC
+    LIMIT
+      3
+    ';
+  }
+
+  return fetch_all_query($db, $sql);
+}
+
+function get_open_rank3_items($db){
+  return get_rank3_items($db, true);
+}
