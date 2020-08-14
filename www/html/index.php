@@ -19,4 +19,6 @@ $user = get_login_user($db);
 
 $items = get_open_items($db);
 
+$rank3_items = get_open_rank3_items($db);
+
 include_once VIEW_PATH . 'index_view.php';
